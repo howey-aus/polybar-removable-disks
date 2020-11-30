@@ -5,12 +5,22 @@ set -o errexit
 LSBLK_COLS="NAME,RM,TYPE,MOUNTPOINT,LABEL" 
 UNMOUNTED_COLOR=`xrdb -query | grep "*color9" | cut -f 2`
 MOUNTED_COLOR=`xrdb -query | grep "*color10" | cut -f 2`
-DEVICES="lsblk -pJlo $OUT_COLS"
 JQ_SCR='.blockdevices[] |
     select(.rm != false and .type == "part") |
-    if .mountpoint != null then "%{F'$MOUNTED_COLOR'}%{A3:udisksctl unmount -b " + .name + ":}" else "%{F'$UNMOUNTED_COLOR'}%{A1:udisksctl mount -b " + .name + ":}" end + " " + .name + "%{A}  "'
+        if .mountpoint != null then
+            "%{F'$MOUNTED_COLOR'}"
+            + "%{A3:"
+            + "udisksctl unmount --no-user-interaction -b " + .name
+            + ":}"
+        else
+            "%{F'$UNMOUNTED_COLOR'}"
+            + "%{A1:udisksctl mount --no-user-interaction -b " + .name + ":}"
+        end
+        + "%{A2:"
+        + "udisksctl power-off --no-user-interaction -b " + .name
+        + ":}"
+	+ " " + (.label // (.name | sub("/dev/" ; ""))) + "%{A}%{A}  "'
 
 lsblk -pJlo $LSBLK_COLS |
-jq "$JQ_SCR" |
-sed 's/\/dev\///2' |
-xargs -L1 echo -n
+jq -r "$JQ_SCR" |
+tr '\n' ' '

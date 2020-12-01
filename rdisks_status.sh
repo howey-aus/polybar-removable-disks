@@ -22,5 +22,5 @@ JQ_SCR='.blockdevices[] |
 	+ " " + (.label // (.name | sub("/dev/" ; ""))) + "%{A}%{A}  "'
 
 lsblk -pJlo $LSBLK_COLS |
-jq -r "$JQ_SCR" |
+{ jq -r "$JQ_SCR"; echo ""; } |
 tr '\n' ' '

@@ -8,6 +8,14 @@ Honors theme colors in ~/.Xresources; Unmounted partitions will show as "red" an
 
 ![polybar-removable-disks](screenshot.png)
 
+Add the following to your polybar config:
+
+```
+[module/removable-disks]
+type = custom/script
+exec = ~/.config/polybar/scripts/removable_disks.sh
+```
+
 ## Dependencies
 
 * `jq`
